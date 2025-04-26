@@ -1,0 +1,158 @@
+# Color Palette Picker – Python Tkinter App
+
+This app is a professional, compact tool that lets users create and save custom color palettes for design or development work. It features a modern interface with styled frames, fonts, and colors.
+
+---
+
+**Features**
+
+- Select up to five colors using a color picker dialog.
+- View your palette in real-time as colored swatches.
+- Copy any color's hex code to clipboard with one click.
+- Save your palette as a text file.
+
+---
+
+### Code
+
+```python
+import tkinter as tk
+from tkinter import ttk, colorchooser, messagebox, filedialog
+import tkinter.font as tkfont
+
+class ColorPalettePicker(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Color Palette Picker")
+        self.geometry("420x320")
+        self.configure(bg="#23272f")
+
+        # Fonts & Styles
+        self.title_font = tkfont.Font(family="Segoe UI", size=16, weight="bold")
+        self.label_font = tkfont.Font(family="Segoe UI", size=10)
+        
+        style = ttk.Style(self)
+        style.theme_use('clam')
+        
+        style.configure('TFrame', background='#2c313a')
+        style.configure('TButton', font=('Segoe UI', 10), padding=6)
+        
+        # Main Frame
+        main_frame = ttk.Frame(self)
+        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+
+        title_lbl = tk.Label(main_frame,
+                             text="Color Palette Picker",
+                             font=self.title_font,
+                             fg="#fafbfc",
+                             bg="#2c313a")
+                             
+        title_lbl.grid(row=0, columnspan=3, pady=(8, 18))
+
+        # Swatch Frames & Buttons
+        self.colors = [None] * 5   # Store hex codes
+        
+        for i in range(5):
+            swatch_frame = ttk.Frame(main_frame)
+            swatch_frame.grid(row=i+1,column=0,pady=(4 if i else 0),padx=(0),sticky='w')
+            
+            btn_pick = ttk.Button(swatch_frame,
+                                  text=f"Pick #{i+1}",
+                                  command=lambda idx=i: self.pick_color(idx),
+                                  width=9)
+            btn_pick.pack(side='left')
+
+            lbl_swatch = tk.Label(swatch_frame,
+                                  width=3,height=1,bg='#444950',
+                                  relief='groove')
+            lbl_swatch.pack(side='left', padx=(12))
+            
+            lbl_hex=tk.Label(swatch_frame,text="",width=9,font=self.label_font,bg='#2c313a',fg='#fafbfc')
+            lbl_hex.pack(side='left')
+
+            btn_copy=tk.Button(swatch_frame,text="Copy",command=lambda idx=i:self.copy_color(idx),
+                               font=('Segoe UI',8),bg='#393e46',fg='#e7eaf3',
+                               activebackground="#4d5361",activeforeground="#fff",
+                               bd=0,width=6,cursor="hand2")
+            btn_copy.pack(side='left',padx=(12))
+            
+            setattr(self,f'swatch_{i}',lbl_swatch)
+            setattr(self,f'hex_{i}',lbl_hex)
+
+        
+         # Save Button 
+         
+         save_btn = ttk.Button(main_frame,text="Save Palette",command=self.save_palette,width=20)
+         save_btn.grid(row=len(self.colors)+2,columnspan=3,pady=(24))
+
+    def pick_color(self,index):
+         rgb,colorhex=colorchooser.askcolor(title=f"Choose Color #{index+1}")
+         if colorhex:
+             getattr(self,f'swatch_{i}').config(bg=colorhex)
+             getattr(self,f'hex_{i}').config(text=colorhex.upper())
+             self.colors[index]=colorhex.upper()
+
+    def copy_color(self,index):
+         code=self.colors[index]
+         if code:
+             try:
+                 self.clipboard_clear()
+                 self.clipboard_append(code)
+                 messagebox.showinfo("Copied!",f"{code} copied to clipboard.")
+             except Exception:
+                 pass
+
+    def save_palette(self):
+         valid=[c for c in self.colors if c]
+         if not valid:
+              messagebox.showwarning("No Colors","Please pick at least one color.")
+              return
+         
+         file=filedialog.asksaveasfilename(defaultextension=".txt",
+                                           filetypes=[("Text Files","*.txt")],
+                                           title="Save Palette As...")
+         
+         if file:
+              try:
+                  with open(file,"w") as f:
+                      f.write("\n".join(valid))
+                  messagebox.showinfo("Saved!","Palette saved successfully.")
+              except Exception as e:
+                  messagebox.showerror("Error",str(e))
+
+
+if __name__=="__main__":
+     app = ColorPalettePicker()
+     app.mainloop()
+```
+
+---
+
+## README.md
+
+### Color Palette Picker – Tkinter App
+
+**What it does:**  
+This desktop application helps you build and manage small custom color palettes (up to five colors). You can select each color visually using the built-in picker dialog; the chosen colors are displayed live on the interface both as colored boxes (swatches) and their hexadecimal codes.
+
+You can easily copy any hex code by clicking "Copy," or export your current palette to a `.txt` file via "Save Palette".
+
+**How it works:**
+
+- **Pick Colors:** Click "Pick" next to each slot; choose from the pop-up dialog.
+- **View Swatches:** Each selected slot shows its actual shade and hex value.
+- **Copy Hex Code:** Click "Copy" beside any filled slot—its value goes straight into your clipboard.
+- **Save Your Work:** Use "Save Palette" at the bottom—choose where you want your `.txt` list of selected hex values saved.
+
+The interface uses modern dark tones (`#23272f`, `#2c313a`) with clean Segoe UI fonts for clarity and professionalism. All controls are spaced for usability.
+
+**Requirements:**
+Python 3.x (Tkinter comes standard).
+
+Run by saving `palette_picker.py` then:
+
+```bash
+python palette_picker.py
+```
+
+Enjoy building beautiful palettes!
