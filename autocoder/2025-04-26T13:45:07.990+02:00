@@ -1,0 +1,155 @@
+# Daily Mood Tracker – Tkinter Python App
+
+This app is a simple, elegant daily mood tracker that lets users log their mood and a short note for the day. It features a professional color palette, modern fonts, and organized frames for clarity.
+
+---
+
+**Features:**
+- Select your current mood from five options (Happy, Sad, Neutral, Angry, Excited)
+- Add an optional note about your day
+- Save entries to a local file (`mood_log.txt`)
+- Clean interface with professional colors and fonts
+
+---
+
+### Code
+
+```python
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from datetime import datetime
+
+# Professional color palette & font settings
+BG_COLOR = "#f4f6fb"
+FRAME_COLOR = "#e3e7ef"
+BUTTON_COLOR = "#4a90e2"
+BUTTON_TEXT = "#ffffff"
+FONT_MAIN = ("Segoe UI", 12)
+FONT_TITLE = ("Segoe UI Semibold", 16)
+
+class MoodTrackerApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Daily Mood Tracker")
+        self.configure(bg=BG_COLOR)
+        self.geometry("400x350")
+        self.resizable(False, False)
+
+        # Title Frame
+        title_frame = tk.Frame(self, bg=FRAME_COLOR)
+        title_frame.pack(fill="x", pady=(15, 5), padx=20)
+        
+        title_label = tk.Label(
+            title_frame,
+            text="How are you feeling today?",
+            bg=FRAME_COLOR,
+            fg="#22223b",
+            font=FONT_TITLE,
+            pady=10,
+        )
+        title_label.pack()
+
+        # Main Frame for inputs
+        main_frame = tk.Frame(self, bg=BG_COLOR)
+        main_frame.pack(fill="both", expand=True, padx=30)
+
+        # Mood selection label & radio buttons
+        mood_label = tk.Label(main_frame, text="Select your mood:", bg=BG_COLOR,
+                              fg="#22223b", font=("Segoe UI Semibold", 12))
+        
+        mood_label.grid(row=0,column=0,columnspan=2,pady=(10,5),sticky='w')
+        
+        self.mood_var = tk.StringVar(value="")
+        
+        moods=[("😊 Happy","Happy"),
+               ("😢 Sad","Sad"),
+               ("😐 Neutral","Neutral"),
+               ("😠 Angry","Angry"),
+               ("🤩 Excited","Excited")]
+        
+        for idx,(emoji,mood) in enumerate(moods):
+            rb=tk.Radiobutton(main_frame,text=f"{emoji} {mood}",variable=self.mood_var,value=mood,bg=BG_COLOR,font=("Segoe UI",11),anchor='w',highlightthickness=0,borderwidth=0,)
+            rb.grid(row=(idx+1),columnspan=2,padx=(20 if idx%2==0 else 40),sticky='w')
+
+        # Note label & entry box 
+        note_label=tk.Label(main_frame,text="Add a note (optional):",bg=BG_COLOR,font=("Segoe UI Semibold",12))
+        note_label.grid(row=len(moods)+1,columnspan=2,pady=(15 if len(moods)>3 else 8 ,3 ),sticky='w')
+
+        self.note_entry=tk.Text(main_frame,height=3,width=32,font=("Segoe UI",11),bg="#fff",bd=1,relief="solid")
+        self.note_entry.grid(row=len(moods)+2,columnspan=2,pady=(0,8))
+
+        # Save button frame 
+        buttonframe=tk.Frame(self,bg=BG_COLOR)
+        buttonframe.pack(pady=(5,18))
+
+        save_btn=tk.Button(buttonframe,text="Save Entry", command=self.save_entry,bg=BUTTON_COLOR,fg=BUTTON_TEXT,font=("Segoe UI Bold",12),activebackground="#357abD",activeforeground="#fff",bd=0,width=18,height=1,cursor="hand2")
+        save_btn.pack()
+
+    def save_entry(self):
+        mood=self.mood_var.get()
+        note=self.note_entry.get('1.0','end').strip()
+        
+        if not mood:
+             messagebox.showwarning("No Mood Selected!","Please select your current mood before saving.")
+             return
+        
+        now=datetime.now().strftime("%Y-%m-%d %H:%M")
+        
+        entry=f"{now} | {mood} | {note}\n"
+        
+        try:
+             with open('mood_log.txt','a',encoding='utf-8') as f:
+                 f.write(entry)
+             messagebox.showinfo("Saved!","Your entry has been saved.")
+             self.mood_var.set("")
+             self.note_entry.delete('1.0','end')
+             
+        except Exception as e:
+             messagebox.showerror("Error!",f"Could not save entry:\n{str(e)}")
+
+if __name__=="__main__":
+     app=MoodTrackerApp()
+     app.mainloop()
+```
+
+---
+
+## README.md
+
+```markdown
+# Daily Mood Tracker – Tkinter Python App
+
+A clean and modern desktop application to help you track your daily moods and notes.
+
+## Features
+
+- **Mood Selection:** Choose from five moods (Happy/Sad/Neutral/Angry/Excited).
+- **Notes:** Optionally add a short description of how you're feeling.
+- **Data Logging:** Each submission is saved locally in `mood_log.txt` with timestamp.
+- **Professional Design:** Uses soft blue-gray tones and Segoe fonts for readability.
+
+## How it Works
+
+1. Run the script using Python (`python filename.py`).
+2. Select today's primary emotion by clicking one of the emoji-labeled radio buttons.
+3. Optionally type any thoughts or notes into the provided box.
+4. Click "Save Entry". Your input will be stored in `mood_log.txt`.
+5. You can view or analyze this file later to reflect on patterns over time.
+
+## Requirements
+
+* Python 3.x  
+* No external dependencies; uses only standard library modules (`tkinter`, `datetime`).
+
+## Customization Tips:
+
+* To change colors or fonts: edit variables at top of script.
+* To add more moods: extend the `moods` list inside code.
+
+Enjoy tracking your feelings!
+```
+
+---
+
+This small but polished app demonstrates best practices in Tkinter GUI design—using frames for layout organization, themed widgets, clear labels, modern color schemes and system-friendly fonts—making it both functional and visually appealing for everyday use.
