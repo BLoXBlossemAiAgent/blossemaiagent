@@ -1,0 +1,204 @@
+# Weather Dashboard App
+
+I'll create a sleek Weather Dashboard application using Python and Tkinter that allows users to check current weather conditions for any city. This app will feature professional styling with custom colors, frames, and fonts.
+
+## Python Application Code
+
+```python
+import tkinter as tk
+from tkinter import ttk, messagebox, font
+import requests
+from datetime import datetime
+import json
+
+class WeatherDashboard:
+    def __init__(self, root):
+        # App configuration
+        self.root = root
+        self.root.title("Weather Dashboard")
+        self.root.geometry("800x500")
+        self.root.resizable(False, False)
+        
+        # Color scheme
+        self.primary_color = "#3498db"  # Blue
+        self.secondary_color = "#2c3e50"  # Dark blue/gray
+        self.accent_color = "#e74c3c"  # Red
+        self.bg_color = "#ecf0f1"  # Light gray
+        self.text_color = "#2c3e50"  # Dark blue/gray
+        
+        # Configure root background
+        self.root.configure(bg=self.bg_color)
+        
+        # Custom fonts
+        self.title_font = font.Font(family="Helvetica", size=24, weight="bold")
+        self.header_font = font.Font(family="Helvetica", size=16, weight="bold")
+        self.normal_font = font.Font(family="Helvetica", size=12)
+        self.small_font = font.Font(family="Helvetica", size=10)
+        
+        # Create frames
+        self.create_frames()
+        
+        # Create widgets
+        self.create_widgets()
+        
+        # API key for OpenWeatherMap (you should get your own)
+        self.api_key = "YOUR_API_KEY_HERE"
+    
+    def create_frames(self):
+        # Header frame
+        self.header_frame = tk.Frame(self.root, bg=self.primary_color, height=80)
+        self.header_frame.pack(fill=tk.X)
+        
+        # Search frame
+        self.search_frame = tk.Frame(self.root, bg=self.bg_color, pady=20)
+        self.search_frame.pack(fill=tk.X)
+        
+        # Results frame
+        self.results_frame = tk.Frame(self.root, bg=self.bg_color)
+        self.results_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Current weather frame
+        self.current_weather_frame = tk.Frame(self.results_frame, bg=self.bg_color, bd=2, relief=tk.GROOVE)
+        self.current_weather_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Footer frame
+        self.footer_frame = tk.Frame(self.root, bg=self.secondary_color, height=30)
+        self.footer_frame.pack(fill=tk.X, side=tk.BOTTOM)
+    
+    def create_widgets(self):
+        # Header widgets
+        self.title_label = tk.Label(
+            self.header_frame, 
+            text="Weather Dashboard",
+            font=self.title_font,
+            bg=self.primary_color,
+            fg="white",
+            pady=15
+        )
+        self.title_label.pack()
+        
+        # Search widgets
+        self.search_label = tk.Label(
+            self.search_frame,
+            text="Enter City Name:",
+            font=self.header_font,
+            bg=self.bg_color,
+            fg=self.text_color
+        )
+        self.search_label.pack(side=tk.LEFT, padx=20)
+        
+        self.search_entry = tk.Entry(
+            self.search_frame,
+            font=self.normal_font,
+            width=25,
+            bd=2,
+            relief=tk.GROOVE
+        )
+        self.search_entry.pack(side=tk.LEFT, padx=10)
+        self.search_entry.bind("<Return>", lambda event: self.get_weather())
+        
+        self.search_button = tk.Button(
+            self.search_frame,
+            text="Search",
+            font=self.normal_font,
+            bg=self.primary_color,
+            fg="white",
+            padx=15,
+            command=self.get_weather
+        )
+        self.search_button.pack(side=tk.LEFT, padx=10)
+        
+        # Current weather widgets (will be populated when searching)
+        self.weather_city = tk.Label(
+            self.current_weather_frame,
+            text="Search for a city to see weather information",
+            font=self.header_font,
+            bg=self.bg_color,
+            fg=self.text_color
+        )
+        self.weather_city.pack(pady=20)
+        
+        # Footer widgets
+        self.footer_label = tk.Label(
+            self.footer_frame,
+            text="© 2025 Weather Dashboard | Created with Python & Tkinter",
+            font=self.small_font,
+            bg=self.secondary_color,
+            fg="white"
+        )
+        self.footer_label.pack(pady=5)
+    
+    def get_weather(self):
+        city = self.search_entry.get().strip()
+        
+        if not city:
+            messagebox.showerror("Error", "Please enter a city name")
+            return
+        
+        # Clear previous weather data
+        for widget in self.current_weather_frame.winfo_children():
+            widget.destroy()
+        
+        try:
+            # In a real app, you would use your API key and make a real request
+            # For demo purposes, we'll simulate a response
+            # url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={self.api_key}&units=metric"
+            # response = requests.get(url)
+            # data = response.json()
+            
+            # Simulated data for demo
+            data = {
+                "name": city.title(),
+                "main": {
+                    "temp": 22.5,
+                    "feels_like": 23.2,
+                    "humidity": 65,
+                    "pressure": 1012
+                },
+                "weather": [{"main": "Clear", "description": "clear sky"}],
+                "wind": {"speed": 3.6},
+                "sys": {"country": "US"}
+            }
+            
+            # Create weather display
+            city_label = tk.Label(
+                self.current_weather_frame,
+                text=f"{data['name']}, {data['sys']['country']}",
+                font=self.title_font,
+                bg=self.bg_color,
+                fg=self.text_color
+            )
+            city_label.pack(pady=(20, 10))
+            
+            temp_label = tk.Label(
+                self.current_weather_frame,
+                text=f"{data['main']['temp']}°C",
+                font=font.Font(family="Helvetica", size=36, weight="bold"),
+                bg=self.bg_color,
+                fg=self.primary_color
+            )
+            temp_label.pack()
+            
+            desc_label = tk.Label(
+                self.current_weather_frame,
+                text=f"{data['weather'][0]['description'].title()}",
+                font=self.header_font,
+                bg=self.bg_color,
+                fg=self.text_color
+            )
+            desc_label.pack(pady=5)
+            
+            # Create details frame
+            details_frame = tk.Frame(self.current_weather_frame, bg=self.bg_color)
+            details_frame.pack(fill=tk.X, pady=20, padx=40)
+            
+            # Left column
+            left_frame = tk.Frame(details_frame, bg=self.bg_color)
+            left_frame.pack(side=tk.LEFT, expand=True)
+            
+            feels_label = tk.Label(
+                left_frame,
+                text=f"Feels Like: {data['main']['feels_like']}°C",
+                font=self.normal_font,
+                bg=self.bg_color,
+                
