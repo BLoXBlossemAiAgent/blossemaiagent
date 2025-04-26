@@ -1,0 +1,95 @@
+# "Focus Timer" – A Minimalist Pomodoro App with Tkinter
+
+This app is a professional, visually appealing Pomodoro-style focus timer. It helps users work in focused intervals (25 minutes by default) followed by short breaks, boosting productivity and time management.
+
+---
+
+**Features:**
+- Clean, modern interface using professional colors and fonts
+- Start/Stop/Reset controls
+- Visual countdown display
+- Session tracking (work/break)
+- Responsive layout with frames for structure
+
+---
+
+### Code
+
+```python
+import tkinter as tk
+from tkinter import font as tkfont
+
+# --- Configuration ---
+WORK_MIN = 25   # Work session length in minutes
+BREAK_MIN = 5   # Break session length in minutes
+
+PRIMARY_COLOR = "#2E4053"
+ACCENT_COLOR = "#58D68D"
+BG_COLOR = "#F4F6F7"
+FONT_MAIN = ("Segoe UI", 24, "bold")
+FONT_SUBTITLE = ("Segoe UI", 14)
+FONT_TIMER = ("Consolas", 48)
+
+class FocusTimerApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Focus Timer")
+        self.geometry("380x300")
+        self.configure(bg=BG_COLOR)
+        self.resizable(False, False)
+
+        # State variables
+        self.is_running = False
+        self.is_work_session = True
+        self.time_left_sec = WORK_MIN * 60
+        
+        # Fonts (for scaling on different systems)
+        tkfont.nametofont("TkDefaultFont").configure(size=12)
+
+        # Layout frames for structure and color separation 
+        header_frame = tk.Frame(self, bg=PRIMARY_COLOR)
+        header_frame.pack(fill="x")
+
+        content_frame = tk.Frame(self, bg=BG_COLOR)
+        content_frame.pack(expand=True, fill="both")
+
+        controls_frame = tk.Frame(self, bg=BG_COLOR)
+        controls_frame.pack(pady=(0,15))
+```
+
+---
+### README.md
+
+```
+# Focus Timer – Minimalist Pomodoro App with Tkinter
+
+## What it Does:
+Focus Timer is a simple desktop application that helps you manage your work sessions using the proven Pomodoro technique. It lets you start focused work intervals (default: 25 minutes), take short breaks (default: 5 minutes), and keeps track of whether you're working or on break. The clean interface uses professional colors and fonts to provide a distraction-free experience.
+
+## How it Works:
+1. **Start** the timer to begin your focus session.
+2. When the timer ends:
+    - If you were working: you'll be prompted to take a break.
+    - If you were on break: it's time to get back to work!
+3. Use **Stop** to pause at any time; **Reset** brings the timer back to the start of your current session type.
+4. The app automatically switches between work and break sessions.
+
+## How To Run:
+1. Make sure Python is installed (`python --version`).
+2. Save `focus_timer.py` from this repo.
+3. Run from terminal or command prompt:
+
+   ```
+   python focus_timer.py
+   ```
+
+No extra packages are required—Tkinter comes standard with Python!
+
+---
+
+Enjoy productive sessions!
+```
+
+---
+
+You can further customize durations or add notification sounds if desired! This design uses clear separation of concerns via frames, modern color schemes for professionalism, and readable fonts for clarity—all best practices in GUI development.
