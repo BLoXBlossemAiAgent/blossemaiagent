@@ -1,0 +1,128 @@
+# Mood Tracker: A Simple Tkinter App
+
+This Python app is a minimalist *Mood Tracker* that lets users log their daily mood with a single click. It features a modern, professional interface using themed frames, custom fonts, and a soothing color palette. The app stores each entry in memory for the session and displays your recent moods.
+
+---
+
+**Features**
+
+- Select your current mood from five options (Happy, Sad, Neutral, Angry, Excited)
+- Log the date and time of each entry
+- View your recent mood history within the app
+- Clean layout with professional colors and fonts
+
+---
+
+```python
+import tkinter as tk
+from tkinter import ttk
+from datetime import datetime
+
+# Professional color scheme & font settings
+BG_COLOR = "#f5f6fa"
+FRAME_COLOR = "#dcdde1"
+BUTTON_COLOR = "#40739e"
+BUTTON_ACTIVE = "#273c75"
+TEXT_COLOR = "#2d3436"
+FONT_TITLE = ("Segoe UI", 18, "bold")
+FONT_LABEL = ("Segoe UI", 12)
+FONT_BUTTON = ("Segoe UI", 11)
+
+class MoodTrackerApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Mood Tracker")
+        self.configure(bg=BG_COLOR)
+        self.geometry("400x350")
+        self.resizable(False, False)
+
+        # Store moods as list of tuples (timestamp_str, mood)
+        self.mood_history = []
+
+        # Title Frame
+        title_frame = tk.Frame(self, bg=FRAME_COLOR)
+        title_frame.pack(fill="x", pady=(10,0))
+        
+        title_label = tk.Label(
+            title_frame,
+            text="How are you feeling today?",
+            bg=FRAME_COLOR,
+            fg=TEXT_COLOR,
+            font=FONT_TITLE,
+            pady=8,
+        )
+        title_label.pack()
+
+        # Mood Buttons Frame
+        button_frame = tk.Frame(self, bg=BG_COLOR)
+        button_frame.pack(pady=(20,10))
+
+        moods_info = [
+            ("😊 Happy", "Happy"),
+            ("😢 Sad", "Sad"),
+            ("😐 Neutral", "Neutral"),
+            ("😠 Angry", "Angry"),
+            ("🤩 Excited", "Excited"),
+         ]
+
+         for idx,(emoji,mood) in enumerate(moods_info):
+             btn=tk.Button(
+                 button_frame,text=emoji,bg=BUTTON_COLOR,
+                 fg="white",
+                 activebackground=BUTTON_ACTIVE,
+                 activeforeground="white",
+                 font=FONT_BUTTON,width=10,height=1,borderwidth=0,cursor="hand2",
+                 command=lambda m=mood:self.log_mood(m),
+             )
+             btn.grid(row=int(idx/3),column=(idx%3),padx=(5 if idx else 0),pady=(5 if idx>2 else 0))
+
+         # History Frame 
+         history_label=tk.Label(self,text="Recent Moods:",bg=BG_COLOR,font=("Segoe UI Semibold",12,"underline"),fg="#353b48")
+         history_label.pack(anchor='w',padx=(25),pady=(15,-4))
+         
+         hist_frm=tk.Frame(self,bg="#ecf0f1")
+         hist_frm.pack(fill='both',expand=True,padx=(20),pady=(0))
+         
+         self.history_box=tk.Listbox(hist_frm,font=("Consolas",11),bg="#ecf0f1",
+                                    fg="#353b48",
+                                    borderwidth=False,height=7,width=None,)
+         self.history_box.pack(side='left',fill='both',expand=True,padx=(4))
+         
+     def log_mood(self,mood):
+          now=datetime.now().strftime("%Y-%m-%d %H:%M")
+          entry=f"{now} - {mood}"
+          self.mood_history.append((now,mood))
+          if len(self.history_box.get(0,'end'))>=7:
+              self.history_box.delete(6)   # keep only last seven entries visible 
+          self.history_box.insert(0,f"{now} | {mood}")
+
+if __name__=="__main__":
+    app=MoodTrackerApp()
+    app.mainloop()
+```
+
+---
+
+## README: Mood Tracker App
+
+### What does it do?
+
+The *Mood Tracker* is a simple desktop application that allows you to quickly record how you're feeling throughout the day. With just one click on an emoji-labeled button representing your current mood (Happy 😊 , Sad 😢 , Neutral 😐 , Angry 😠 , or Excited 🤩 ), the app logs both your selection and the exact date/time.
+
+Your most recent seven entries are displayed in an easy-to-read list within the main window.
+
+### How does it work?
+
+- **Run** `python <filename>.py` to launch.
+- Click any emoji/mood button to instantly log today's feeling.
+- The left panel will show up to seven of your latest logged moods with timestamps.
+  
+All data is stored only during this session; closing the window clears previous logs.
+
+#### Design Notes:
+
+The interface uses subtle blues/greys for backgrounds and frames (`#40739e`, `#dcdde1`, `#ecf0f1` etc.), clear sans-serif fonts (`Segoe UI`, `Consolas` for lists), rounded buttons without borders for modern feel—all chosen for clarity and professionalism.
+
+You can easily expand this project by adding persistent storage or analytics!
+
+---
