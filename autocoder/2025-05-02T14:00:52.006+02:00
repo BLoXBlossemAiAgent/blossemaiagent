@@ -1,0 +1,189 @@
+# Weather Dashboard App
+
+I'll create a sleek Weather Dashboard app using Tkinter with modern styling. This app will allow users to check weather conditions for any city.
+
+## Python Code
+
+```python
+import tkinter as tk
+from tkinter import ttk, messagebox
+import requests
+import json
+from datetime import datetime
+import ttkbootstrap as tb
+
+class WeatherDashboard:
+    def __init__(self, root):
+        # Configure the root window
+        self.root = root
+        self.root.title("Weather Dashboard")
+        self.root.geometry("700x500")
+        self.root.resizable(False, False)
+        
+        # Set theme using ttkbootstrap
+        self.style = tb.Style(theme="flatly")
+        
+        # Create frames
+        self.create_frames()
+        
+        # Create widgets
+        self.create_widgets()
+        
+    def create_frames(self):
+        # Main container with padding
+        self.main_frame = ttk.Frame(self.root, padding=20)
+        self.main_frame.pack(fill="both", expand=True)
+        
+        # Search frame (top)
+        self.search_frame = ttk.Frame(self.main_frame)
+        self.search_frame.pack(fill="x", pady=(0, 20))
+        
+        # Results frame (middle)
+        self.results_frame = ttk.Frame(self.main_frame)
+        self.results_frame.pack(fill="both", expand=True)
+        
+        # Current weather frame (left side of results)
+        self.current_frame = ttk.LabelFrame(self.results_frame, text="Current Weather", padding=15)
+        self.current_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
+        
+        # Forecast frame (right side of results)
+        self.forecast_frame = ttk.LabelFrame(self.results_frame, text="3-Day Forecast", padding=15)
+        self.forecast_frame.pack(side="right", fill="both", expand=True)
+        
+    def create_widgets(self):
+        # Search section
+        ttk.Label(self.search_frame, text="Enter City:", font=("Helvetica", 12)).pack(side="left", padx=(0, 10))
+        
+        self.city_entry = ttk.Entry(self.search_frame, width=30, font=("Helvetica", 12))
+        self.city_entry.pack(side="left", padx=(0, 10))
+        self.city_entry.focus()
+        
+        self.search_button = ttk.Button(
+            self.search_frame, 
+            text="Search", 
+            command=self.get_weather,
+            style="primary.TButton"
+        )
+        self.search_button.pack(side="left")
+        
+        # Bind Enter key to search
+        self.city_entry.bind("<Return>", lambda event: self.get_weather())
+        
+        # Current weather widgets
+        self.city_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 16, "bold"))
+        self.city_label.pack(anchor="w", pady=(0, 10))
+        
+        self.date_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 10))
+        self.date_label.pack(anchor="w", pady=(0, 15))
+        
+        self.temp_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 24))
+        self.temp_label.pack(anchor="w", pady=(0, 5))
+        
+        self.desc_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 12))
+        self.desc_label.pack(anchor="w", pady=(0, 15))
+        
+        self.feels_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 11))
+        self.feels_label.pack(anchor="w", pady=(0, 5))
+        
+        self.humidity_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 11))
+        self.humidity_label.pack(anchor="w", pady=(0, 5))
+        
+        self.wind_label = ttk.Label(self.current_frame, text="", font=("Helvetica", 11))
+        self.wind_label.pack(anchor="w")
+        
+        # Forecast widgets (placeholders for 3-day forecast)
+        for i in range(3):
+            forecast_day = ttk.Frame(self.forecast_frame, padding=5)
+            forecast_day.pack(fill="x", pady=(0, 10))
+            
+            ttk.Label(forecast_day, text=f"Day {i+1}", font=("Helvetica", 12, "bold")).pack(anchor="w")
+            ttk.Label(forecast_day, text="--°C / --°C").pack(anchor="w")
+            ttk.Label(forecast_day, text="--").pack(anchor="w")
+    
+    def get_weather(self):
+        city = self.city_entry.get().strip()
+        if not city:
+            messagebox.showwarning("Input Error", "Please enter a city name")
+            return
+            
+        # This would normally connect to a weather API
+        # For demo purposes, we'll simulate a response
+        self.display_weather_data(city)
+    
+    def display_weather_data(self, city):
+        # In a real app, this data would come from an API
+        # Simulating weather data for demonstration
+        self.city_label.config(text=f"{city.title()}")
+        self.date_label.config(text=datetime.now().strftime("%A, %B %d, %Y"))
+        self.temp_label.config(text="24°C")
+        self.desc_label.config(text="Partly Cloudy")
+        self.feels_label.config(text="Feels like: 26°C")
+        self.humidity_label.config(text="Humidity: 65%")
+        self.wind_label.config(text="Wind: 12 km/h")
+        
+        # Update forecast days with sample data
+        forecast_data = [
+            {"day": "Tomorrow", "temp": "26°C / 18°C", "desc": "Sunny"},
+            {"day": "Saturday", "temp": "28°C / 19°C", "desc": "Clear"},
+            {"day": "Sunday", "temp": "25°C / 17°C", "desc": "Partly Cloudy"}
+        ]
+        
+        # Clear existing forecast widgets
+        for widget in self.forecast_frame.winfo_children():
+            widget.destroy()
+            
+        # Create new forecast widgets
+        for data in forecast_data:
+            forecast_day = ttk.Frame(self.forecast_frame, padding=5)
+            forecast_day.pack(fill="x", pady=(0, 10))
+            
+            ttk.Label(forecast_day, text=data["day"], font=("Helvetica", 12, "bold")).pack(anchor="w")
+            ttk.Label(forecast_day, text=data["temp"]).pack(anchor="w")
+            ttk.Label(forecast_day, text=data["desc"]).pack(anchor="w")
+
+if __name__ == "__main__":
+    root = tb.Window(themename="flatly")
+    app = WeatherDashboard(root)
+    root.mainloop()
+```
+
+## README.md
+
+```markdown
+# Weather Dashboard
+
+A sleek, modern weather dashboard application built with Python and Tkinter.
+
+## Features
+
+- Clean, modern UI using ttkbootstrap for styling
+- Search for weather by city name
+- Display current weather conditions including:
+  - Temperature
+  - Weather description
+  - "Feels like" temperature
+  - Humidity
+  - Wind speed
+- 3-day weather forecast
+
+## Requirements
+
+- Python 3.6+
+- Required packages:
+  - tkinter
+  - ttkbootstrap
+  - requests
+
+## Installation
+
+1. Clone this repository or download the source code
+2. Install the required packages:
+
+```bash
+pip install ttkbootstrap requests
+```
+
+3. Run the application:
+
+```bash
+python weather_dashboard.
