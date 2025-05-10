@@ -1,0 +1,169 @@
+# Weather Dashboard App
+
+I'll create a sleek Weather Dashboard application using Tkinter with modern styling. This app will allow users to check weather forecasts for different cities.
+
+## Python Code
+
+```python
+import tkinter as tk
+from tkinter import ttk
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+import random
+
+class WeatherDashboard:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Weather Dashboard")
+        self.root.geometry("800x500")
+        self.root.resizable(False, False)
+        
+        # Set theme
+        self.style = tb.Style(theme="darkly")
+        
+        # Create main frames
+        self.create_frames()
+        
+        # Create widgets
+        self.create_widgets()
+        
+        # Sample cities
+        self.cities = ["New York", "London", "Tokyo", "Paris", "Sydney", "Berlin", "Moscow"]
+        
+        # Populate city list
+        for city in self.cities:
+            self.city_listbox.insert(tk.END, city)
+    
+    def create_frames(self):
+        # Left sidebar for search and city list
+        self.sidebar_frame = tb.Frame(self.root, bootstyle="dark")
+        self.sidebar_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+        
+        # Main content area
+        self.content_frame = tb.Frame(self.root)
+        self.content_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Current weather frame
+        self.current_weather_frame = tb.Frame(self.content_frame, bootstyle="default")
+        self.current_weather_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Forecast frame
+        self.forecast_frame = tb.Frame(self.content_frame, bootstyle="default")
+        self.forecast_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    def create_widgets(self):
+        # Sidebar widgets
+        tb.Label(self.sidebar_frame, text="Weather Dashboard", font=("Helvetica", 16, "bold"), 
+                bootstyle="inverse-dark").pack(pady=10)
+        
+        # Search frame
+        search_frame = tb.Frame(self.sidebar_frame)
+        search_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.search_entry = tb.Entry(search_frame, width=15, font=("Helvetica", 10))
+        self.search_entry.pack(side=tk.LEFT, padx=5, pady=10)
+        
+        search_button = tb.Button(search_frame, text="Search", bootstyle="info", 
+                                command=self.search_city)
+        search_button.pack(side=tk.RIGHT, padx=5, pady=10)
+        
+        # City list
+        tb.Label(self.sidebar_frame, text="Saved Cities", font=("Helvetica", 12), 
+                bootstyle="inverse-dark").pack(pady=5)
+        
+        self.city_listbox = tk.Listbox(self.sidebar_frame, height=10, width=20, 
+                                    font=("Helvetica", 10), bg="#2b3e50", fg="white",
+                                    selectbackground="#df691a")
+        self.city_listbox.pack(padx=5, pady=5, fill=tk.X)
+        self.city_listbox.bind("<<ListboxSelect>>", self.on_city_select)
+        
+        # Add and remove buttons
+        button_frame = tb.Frame(self.sidebar_frame)
+        button_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        add_button = tb.Button(button_frame, text="Add City", bootstyle="success", 
+                            command=self.add_city)
+        add_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        remove_button = tb.Button(button_frame, text="Remove", bootstyle="danger", 
+                                command=self.remove_city)
+        remove_button.pack(side=tk.RIGHT, padx=5, pady=5)
+        
+        # Current weather widgets
+        tb.Label(self.current_weather_frame, text="Current Weather", 
+                font=("Helvetica", 14, "bold")).pack(pady=5)
+        
+        self.city_label = tb.Label(self.current_weather_frame, text="Select a city", 
+                                font=("Helvetica", 18))
+        self.city_label.pack(pady=5)
+        
+        self.temp_label = tb.Label(self.current_weather_frame, text="--°C", 
+                                font=("Helvetica", 36, "bold"))
+        self.temp_label.pack(pady=5)
+        
+        self.condition_label = tb.Label(self.current_weather_frame, text="--", 
+                                    font=("Helvetica", 12))
+        self.condition_label.pack(pady=5)
+        
+        # Forecast widgets
+        tb.Label(self.forecast_frame, text="5-Day Forecast", 
+                font=("Helvetica", 14, "bold")).pack(pady=5)
+        
+        # Create forecast day frames
+        self.forecast_days = []
+        forecast_container = tb.Frame(self.forecast_frame)
+        forecast_container.pack(fill=tk.X, padx=10, pady=10)
+        
+        for i in range(5):
+            day_frame = tb.Frame(forecast_container, bootstyle="secondary")
+            day_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+            
+            day_label = tb.Label(day_frame, text=f"Day {i+1}", font=("Helvetica", 10, "bold"))
+            day_label.pack(pady=5)
+            
+            temp_label = tb.Label(day_frame, text="--°C", font=("Helvetica", 14))
+            temp_label.pack(pady=5)
+            
+            cond_label = tb.Label(day_frame, text="--", font=("Helvetica", 10))
+            cond_label.pack(pady=5)
+            
+            self.forecast_days.append((day_label, temp_label, cond_label))
+    
+    def search_city(self):
+        city = self.search_entry.get()
+        if city:
+            self.update_weather(city)
+            self.search_entry.delete(0, tk.END)
+    
+    def add_city(self):
+        city = self.search_entry.get()
+        if city and city not in self.cities:
+            self.cities.append(city)
+            self.city_listbox.insert(tk.END, city)
+            self.search_entry.delete(0, tk.END)
+    
+    def remove_city(self):
+        selected = self.city_listbox.curselection()
+        if selected:
+            index = selected[0]
+            self.city_listbox.delete(index)
+            self.cities.pop(index)
+    
+    def on_city_select(self, event):
+        selected = self.city_listbox.curselection()
+        if selected:
+            index = selected[0]
+            city = self.city_listbox.get(index)
+            self.update_weather(city)
+    
+    def update_weather(self, city):
+        # In a real app, this would fetch data from a weather API
+        # For this example, we'll use random data
+        self.city_label.config(text=city)
+        
+        # Random temperature between -10 and 40
+        temp = random.randint(-10, 40)
+        self.temp_label.config(text=f"{temp}°C")
+        
+        # Random condition
+        conditions = ["Sunny", "Cloudy", "Rainy", "Snowy", "Partly Cloudy", "Thunderstorms"]
