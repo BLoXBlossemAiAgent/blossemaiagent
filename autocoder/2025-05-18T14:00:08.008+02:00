@@ -1,0 +1,75 @@
+# Mood Palette – A Mood-to-Color Journal
+
+**Concept:**  
+"Mood Palette" is a unique daily mood journal that translates your feelings into a personalized color palette. Each day, you select or describe your mood, and the app generates a harmonious set of colors representing your emotional state. Over time, you can view your "Mood Calendar," visualizing how your moods shift in color throughout the month.
+
+---
+
+## Features
+
+- **Daily Mood Entry:** Choose from preset moods or type a custom description.
+- **AI Color Generation:** The app maps moods to professional color palettes using an internal mapping (e.g., calm = blues/greens; energetic = reds/oranges).
+- **Mood Calendar View:** See each day's mood as a colored tile in a monthly calendar grid.
+- **Palette Export:** Save any day's palette as an image for inspiration or sharing.
+- **Modern UI Design:** Uses frames, gradients, and professional fonts for an elegant look.
+
+---
+
+## Code: `mood_palette.py`
+
+```python
+import tkinter as tk
+from tkinter import ttk
+from datetime import datetime
+import calendar
+
+# Professional font and color settings
+FONT_TITLE = ("Segoe UI", 20, "bold")
+FONT_BODY = ("Segoe UI", 12)
+COLOR_BG = "#22223B"
+COLOR_FRAME = "#4A4E69"
+COLOR_ACCENT1 = "#9A8C98"
+COLOR_ACCENT2 = "#C9ADA7"
+MOOD_COLORS = {
+    "Happy": ["#FFD166", "#FFAD69", "#FF61A6"],
+    "Calm": ["#06D6A0", "#118AB2", "#073B4C"],
+    "Energetic": ["#EF476F", "#FFD166", "#06D6A0"],
+    "Sad": ["#26547C", "#3E92CC", "#5FA8D3"],
+    "Anxious": ["#F67280", "#355C7D", "#6C5B7B"]
+}
+
+class MoodPaletteApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Mood Palette")
+        self.configure(bg=COLOR_BG)
+        self.geometry("600x500")
+        self.moods_by_date = {}
+        
+        # Title Frame
+        title_frame = tk.Frame(self, bg=COLOR_BG)
+        title_frame.pack(pady=10)
+        
+        tk.Label(title_frame, text="Mood Palette 🎨",
+                 font=FONT_TITLE,
+                 fg=COLOR_ACCENT1,
+                 bg=COLOR_BG).pack()
+        
+        # Input Frame
+        input_frame = tk.Frame(self, bg=COLOR_FRAME)
+        input_frame.pack(pady=(10, 20), padx=30)
+
+        tk.Label(input_frame,
+                 text="How do you feel today?",
+                 font=FONT_BODY,
+                 fg="white",
+                 bg=COLOR_FRAME).grid(row=0,columnspan=2,padx=(10),pady=(10))
+        
+        self.mood_var=tk.StringVar()
+        
+        # Preset Moods Dropdown
+        ttk.Combobox(input_frame,textvariable=self.mood_var,
+                     values=list(MOOD_COLORS.keys()),
+                     font=("Segoe UI Semibold",11),
+                     width=15).grid(row=1,columnspan=2,padx=(10),pady=(5))
+```
