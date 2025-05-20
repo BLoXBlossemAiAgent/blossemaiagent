@@ -1,0 +1,148 @@
+# Plant Health Monitor with Tkinter GUI
+
+I've created a unique Python application that helps users monitor and track the health of their houseplants using a simple yet effective GUI. This app allows plant enthusiasts to log watering schedules, track growth, and receive reminders for plant care.
+
+## The Application
+
+Here's the complete code for the Plant Health Monitor:
+
+```python
+import tkinter as tk
+from tkinter import ttk, messagebox, font
+from datetime import datetime, timedelta
+import json
+import os
+
+class PlantHealthMonitor:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Plant Health Monitor")
+        self.root.geometry("800x600")
+        self.root.configure(bg="#E8F5E9")  # Light green background
+        
+        # Custom fonts
+        self.title_font = font.Font(family="Helvetica", size=16, weight="bold")
+        self.header_font = font.Font(family="Helvetica", size=12, weight="bold")
+        self.normal_font = font.Font(family="Helvetica", size=10)
+        
+        # Data storage
+        self.plants_data = self.load_data()
+        
+        # Create main frames
+        self.create_frames()
+        
+        # Create widgets
+        self.create_widgets()
+        
+        # Check for plant care reminders on startup
+        self.check_reminders()
+
+    def load_data(self):
+        try:
+            if os.path.exists("plant_data.json"):
+                with open("plant_data.json", "r") as file:
+                    return json.load(file)
+            return {}
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load data: {str(e)}")
+            return {}
+    
+    def save_data(self):
+        try:
+            with open("plant_data.json", "w") as file:
+                json.dump(self.plants_data, file, indent=4)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save data: {str(e)}")
+    
+    def create_frames(self):
+        # Main container with padding
+        self.main_container = ttk.Frame(self.root, padding="10")
+        self.main_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Left frame for plant list and add plant form
+        self.left_frame = ttk.Frame(self.main_container, padding="5")
+        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Right frame for plant details and health tracking
+        self.right_frame = ttk.Frame(self.main_container, padding="5")
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        # Style configuration
+        style = ttk.Style()
+        style.configure("TFrame", background="#E8F5E9")
+        style.configure("TLabel", background="#E8F5E9", font=self.normal_font)
+        style.configure("TButton", font=self.normal_font)
+        style.configure("Header.TLabel", font=self.header_font)
+        style.configure("Title.TLabel", font=self.title_font)
+        
+    def create_widgets(self):
+        # Left frame widgets
+        ttk.Label(self.left_frame, text="Plant Health Monitor", style="Title.TLabel").pack(pady=10)
+        
+        # Add plant section
+        add_plant_frame = ttk.LabelFrame(self.left_frame, text="Add New Plant", padding="10")
+        add_plant_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(add_plant_frame, text="Plant Name:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.plant_name_entry = ttk.Entry(add_plant_frame, width=20)
+        self.plant_name_entry.grid(row=0, column=1, pady=5)
+        
+        ttk.Label(add_plant_frame, text="Plant Type:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.plant_type_entry = ttk.Entry(add_plant_frame, width=20)
+        self.plant_type_entry.grid(row=1, column=1, pady=5)
+        
+        ttk.Label(add_plant_frame, text="Watering Frequency (days):").grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.water_freq_entry = ttk.Spinbox(add_plant_frame, from_=1, to=30, width=5)
+        self.water_freq_entry.set(7)
+        self.water_freq_entry.grid(row=2, column=1, sticky=tk.W, pady=5)
+        
+        ttk.Button(add_plant_frame, text="Add Plant", command=self.add_plant).grid(row=3, column=0, columnspan=2, pady=10)
+        
+        # Plant list section
+        plant_list_frame = ttk.LabelFrame(self.left_frame, text="Your Plants", padding="10")
+        plant_list_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        self.plant_listbox = tk.Listbox(plant_list_frame, height=10, width=30, font=self.normal_font, bg="#F1F8E9", selectbackground="#81C784")
+        self.plant_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        scrollbar = ttk.Scrollbar(plant_list_frame, orient=tk.VERTICAL, command=self.plant_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.plant_listbox.config(yscrollcommand=scrollbar.set)
+        
+        self.plant_listbox.bind('<<ListboxSelect>>', self.show_plant_details)
+        
+        # Populate plant list
+        self.update_plant_list()
+        
+        # Right frame widgets
+        self.detail_frame = ttk.LabelFrame(self.right_frame, text="Plant Details", padding="10")
+        self.detail_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Initially show a welcome message
+        self.welcome_label = ttk.Label(self.detail_frame, text="Select a plant to view details", style="Header.TLabel")
+        self.welcome_label.pack(pady=50)
+        
+        # Action buttons frame
+        self.action_frame = ttk.Frame(self.right_frame, padding="10")
+        self.action_frame.pack(fill=tk.X, pady=10)
+        
+        self.water_button = ttk.Button(self.action_frame, text="Log Watering", command=self.log_watering, state=tk.DISABLED)
+        self.water_button.pack(side=tk.LEFT, padx=5)
+        
+        self.growth_button = ttk.Button(self.action_frame, text="Log Growth", command=self.log_growth, state=tk.DISABLED)
+        self.growth_button.pack(side=tk.LEFT, padx=5)
+        
+        self.delete_button = ttk.Button(self.action_frame, text="Delete Plant", command=self.delete_plant, state=tk.DISABLED)
+        self.delete_button.pack(side=tk.RIGHT, padx=5)
+    
+    def update_plant_list(self):
+        self.plant_listbox.delete(0, tk.END)
+        for plant_name in sorted(self.plants_data.keys()):
+            self.plant_listbox.insert(tk.END, plant_name)
+    
+    def add_plant(self):
+        name = self.plant_name_entry.get().strip()
+        plant_type = self.plant_type_entry.get().strip()
+        
+        try:
+            water_freq = int(self.water_freq_entry.get())
