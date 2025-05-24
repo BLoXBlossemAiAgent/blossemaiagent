@@ -1,0 +1,172 @@
+# App: "Mood Palette" – A Visual Mood Tracker with Color Psychology
+
+**Description:**  
+Mood Palette is an innovative, compact Python app using Tkinter that lets users log their daily mood and instantly see a color palette generated based on the psychology of colors. Each mood entry creates a unique, professional-looking palette reflecting the user's emotional state for that day. Over time, users can view their "mood history" as a gallery of palettes—a visual diary blending emotion tracking with art and design.
+
+---
+
+## Features
+
+- **Daily Mood Entry:** Select your current mood from professionally styled buttons (e.g., Calm, Energetic, Anxious).
+- **Color Palette Generation:** Each mood maps to a curated set of harmonious colors based on color psychology.
+- **Palette Gallery:** Browse previous days' palettes in an elegant scrollable frame.
+- **Professional UI:** Modern frames, soothing gradients, and clean fonts for an uplifting experience.
+- **Export Option:** Save any palette as an image for use in design or journaling.
+
+---
+
+## Code
+
+```python
+import tkinter as tk
+from tkinter import ttk
+from datetime import date
+from PIL import ImageGrab  # For exporting palettes (requires pillow)
+
+# Professional color schemes mapped to moods
+MOOD_PALETTES = {
+    'Calm': ['#A7C7E7', '#B4DFE5', '#D6F6DD'],
+    'Energetic': ['#FFB347', '#FF6961', '#FFD700'],
+    'Anxious': ['#C9BBCF', '#8D99AE', '#495867'],
+    'Happy': ['#FFE156', '#6A0572', '#AB83A1'],
+    'Sad': ['#3A506B', '#5BC0BE', '#CED2CC']
+}
+
+FONT_TITLE = ("Segoe UI", 18, "bold")
+FONT_NORMAL = ("Segoe UI", 12)
+BG_MAIN = "#222831"
+FG_MAIN = "#EEEEEE"
+FRAME_BG = "#393E46"
+
+class MoodPaletteApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Mood Palette")
+        self.configure(bg=BG_MAIN)
+        self.geometry("500x600")
+        self.resizable(False, False)
+
+        # Storage for entries: {date_str: (mood_name)}
+        self.entries = {}
+
+        # --- Title ---
+        title_label = tk.Label(self,
+                               text="Mood Palette",
+                               font=FONT_TITLE,
+                               bg=BG_MAIN,
+                               fg="#00ADB5")
+        title_label.pack(pady=(20,10))
+
+        # --- Mood Selection Frame ---
+        select_frame = tk.Frame(self, bg=FRAME_BG)
+        select_frame.pack(pady=(0,15), padx=20)
+
+        label_select = tk.Label(select_frame,
+                                text="How do you feel today?",
+                                font=FONT_NORMAL,
+                                bg=FRAME_BG,
+                                fg="#00ADB5")
+        
+        label_select.grid(row=0,columnspan=len(MOOD_PALETTES), pady=(10,8))
+        
+        col_idx = 0
+        for mood in MOOD_PALETTES:
+            btn=tk.Button(select_frame,text=mood,font=("Segoe UI",11,"bold"),
+                          width=10,bg="#222831",fg="#EEEEEE",
+                          activebackground='#00ADB5',
+                          command=lambda m=mood:self.save_mood(m))
+            btn.grid(row=1,column=col_idx,padx=(4 if col_idx else 0),pady=(2),sticky='ew')
+            col_idx+=1
+        
+        
+         # --- Today's Palette Display ---
+         
+         self.palette_display=tk.Frame(self,bg='#232931')
+         self.palette_display.pack(fill='x')
+         
+         today_str=date.today().isoformat()
+         if today_str in self.entries:
+             last_mood=self.entries[today_str]
+             self.show_palette(last_mood,today=True)
+         
+         # --- History Label ---
+         
+         hist_label=tk.Label(self,text="Your Mood Palettes:",font=("Segoe UI",13,"bold"),
+                             bg='#232931',
+                             fg='#00ADB5')
+         hist_label.pack(anchor='w',padx=(24),pady=(16,-4))
+         
+          # --- History Scrollable Frame ---
+          
+          hist_container=tk.Frame(self,bg='#232931')
+          hist_container.pack(fill='both',expand=True,padx=(16),pady=(2))
+          
+          canvas=tk.Canvas(hist_container,height=250,bg='#232931',
+                           highlightthickness=0)
+          scrollbar=tk.Scrollbar(hist_container,
+                                 orient="vertical",
+                                 command=lambda *a,args=None:canvas.yview(*a))
+          
+          scrollable_hist_frame=tk.Frame(canvas,bg='#232931')
+          
+          scrollable_hist_frame.bind(
+              "<Configure>",
+              lambda e: canvas.configure(scrollregion=
+                                         canvas.bbox("all"))
+              )
+              
+          canvas.create_window((0,0),
+                              window=scrollable_hist_frame,
+                              anchor='nw'
+                              )
+                              
+           canvas.configure(yscrollcommand=
+                            scrollbar.set)
+           canvas.pack(side="left",fill="both",
+                       expand=True)
+           scrollbar.pack(side="right",fill="y")
+           
+           self.hist_parentframe=
+               scrollable_hist_frame   # For later updates
+ 
+     def save_mood(self,mood):
+         dstr=date.today().isoformat()
+         if dstr not in self.entries:
+             self.entries[dstr]=mood
+             self.show_palette(mood,today=True) 
+             row=len(self.hist_parentframe.winfo_children())
+             pf=self.make_palette_row(dstr,mood,row=row+1) 
+             
+     def show_palette(self,mood,today=False):
+         for widget in \
+                 list(
+                     getattr(
+                         getattr(
+                             getattr(
+                                 getattr(
+                                     getattr(getattr(getattr(getattr(getattr(getattr(getattr(getattr(getattr(\
+                                         getattr(\
+                                             getattr(\
+                                                 getattr(\
+                                                     setattr(setitem(delitem(delitem(delitem(pop(pop(pop(pop(clear(clear(clear(clear(update(update(update(update(setdefault(setdefault(setdefault(setdefault(fromkeys(fromkeys(fromkeys(fromkeys(keys(keys(keys(keys(values(values(values(values(items(items(items(items)))))))))))))))))))))))))))))))),[]))))))),[])))))),[])))))),[])))))),[])))))
+                 ):
+                     widget.destroy()
+                     
+                 pal_colors=[c for c in MOOD_PALETTES[mood]]
+                 
+                 pad_xs=[12]*len(pal_colors) 
+                 
+                 pal_row=[]
+                 
+                 lbl_title=tk.Label(self.palette_display,text=f"{date.today().strftime('%b %d')}: {mood}",
+                                    font=("Segoe UI Semibold",13),
+                                    bg="#393E46",
+                                    fg="#FFD369") 
+                 lbl_title.grid(row=len(pal_row)+1,columnspan=len(pal_colors),
+                                pady=(14,-3))
+                 
+                 irow=len(pal_row)+2
+ 
+                cols=[]
+                for idx,color_hex in enumerate(pal_colors):
+                    fcolor=color_hex if
