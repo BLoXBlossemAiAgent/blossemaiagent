@@ -1,0 +1,157 @@
+# Cosmic Mood Tracker: A Personal Wellness Companion
+
+I've created a unique Python app called "Cosmic Mood Tracker" that helps users track their daily mood alongside cosmic events like moon phases and solar activity. This app combines wellness tracking with astronomy in a visually appealing interface.
+
+Here's the complete code:
+
+```python
+import tkinter as tk
+from tkinter import ttk, messagebox, font
+from datetime import datetime
+import random
+import json
+import os
+from tkcalendar import Calendar
+
+class CosmicMoodTracker(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        
+        # App configuration
+        self.title("Cosmic Mood Tracker")
+        self.geometry("800x600")
+        self.configure(bg="#1E1E2E")
+        
+        # Custom fonts
+        self.title_font = font.Font(family="Helvetica", size=18, weight="bold")
+        self.header_font = font.Font(family="Helvetica", size=14, weight="bold")
+        self.normal_font = font.Font(family="Helvetica", size=12)
+        
+        # Color scheme
+        self.colors = {
+            "bg": "#1E1E2E",
+            "fg": "#CDD6F4",
+            "accent1": "#89B4FA",
+            "accent2": "#F5C2E7",
+            "accent3": "#94E2D5",
+            "frame_bg": "#313244"
+        }
+        
+        # Data storage
+        self.data_file = "cosmic_mood_data.json"
+        self.mood_data = self.load_data()
+        
+        # Moon phases (simplified)
+        self.moon_phases = ["New Moon", "Waxing Crescent", "First Quarter", 
+                           "Waxing Gibbous", "Full Moon", "Waning Gibbous", 
+                           "Last Quarter", "Waning Crescent"]
+        
+        # Create UI
+        self.create_widgets()
+        
+    def load_data(self):
+        if os.path.exists(self.data_file):
+            try:
+                with open(self.data_file, 'r') as f:
+                    return json.load(f)
+            except:
+                return {}
+        return {}
+    
+    def save_data(self):
+        with open(self.data_file, 'w') as f:
+            json.dump(self.mood_data, f)
+    
+    def create_widgets(self):
+        # Main container
+        main_frame = tk.Frame(self, bg=self.colors["bg"], padx=20, pady=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title
+        title_label = tk.Label(main_frame, text="Cosmic Mood Tracker", 
+                              font=self.title_font, bg=self.colors["bg"], 
+                              fg=self.colors["accent2"], pady=10)
+        title_label.pack(fill=tk.X)
+        
+        # Content frame with two columns
+        content_frame = tk.Frame(main_frame, bg=self.colors["bg"])
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_columnconfigure(1, weight=1)
+        
+        # Left column - Input section
+        input_frame = tk.Frame(content_frame, bg=self.colors["frame_bg"], 
+                              padx=15, pady=15, relief=tk.RAISED, bd=1)
+        input_frame.grid(row=0, column=0, sticky="nsew", padx=10)
+        
+        # Date selector
+        date_frame = tk.Frame(input_frame, bg=self.colors["frame_bg"])
+        date_frame.pack(fill=tk.X, pady=10)
+        
+        date_label = tk.Label(date_frame, text="Date:", font=self.header_font, 
+                             bg=self.colors["frame_bg"], fg=self.colors["fg"])
+        date_label.pack(side=tk.LEFT)
+        
+        self.selected_date = datetime.now().strftime("%Y-%m-%d")
+        self.date_button = tk.Button(date_frame, text=self.selected_date, 
+                                    font=self.normal_font, bg=self.colors["accent1"], 
+                                    fg="#000000", command=self.show_calendar)
+        self.date_button.pack(side=tk.LEFT, padx=10)
+        
+        # Mood selector
+        mood_label = tk.Label(input_frame, text="How are you feeling today?", 
+                             font=self.header_font, bg=self.colors["frame_bg"], 
+                             fg=self.colors["fg"], pady=10)
+        mood_label.pack(fill=tk.X)
+        
+        moods_frame = tk.Frame(input_frame, bg=self.colors["frame_bg"])
+        moods_frame.pack(fill=tk.X, pady=5)
+        
+        self.mood_var = tk.StringVar()
+        moods = ["Ecstatic", "Happy", "Calm", "Neutral", "Tired", "Sad", "Stressed"]
+        
+        for i, mood in enumerate(moods):
+            rb = tk.Radiobutton(moods_frame, text=mood, variable=self.mood_var, 
+                               value=mood, bg=self.colors["frame_bg"], 
+                               fg=self.colors["fg"], selectcolor=self.colors["accent3"],
+                               font=self.normal_font)
+            rb.grid(row=i//3, column=i%3, sticky="w", padx=5, pady=5)
+        
+        # Notes
+        notes_label = tk.Label(input_frame, text="Notes:", font=self.header_font, 
+                              bg=self.colors["frame_bg"], fg=self.colors["fg"], pady=10)
+        notes_label.pack(fill=tk.X)
+        
+        self.notes_text = tk.Text(input_frame, height=5, width=30, font=self.normal_font,
+                                 bg="#2A2A3C", fg=self.colors["fg"], insertbackground=self.colors["fg"])
+        self.notes_text.pack(fill=tk.X, pady=5)
+        
+        # Save button
+        save_button = tk.Button(input_frame, text="Save Entry", font=self.header_font,
+                               bg=self.colors["accent3"], fg="#000000", padx=10, pady=5,
+                               command=self.save_entry)
+        save_button.pack(pady=15)
+        
+        # Right column - Cosmic info and stats
+        info_frame = tk.Frame(content_frame, bg=self.colors["frame_bg"], 
+                             padx=15, pady=15, relief=tk.RAISED, bd=1)
+        info_frame.grid(row=0, column=1, sticky="nsew", padx=10)
+        
+        # Cosmic information
+        cosmic_label = tk.Label(info_frame, text="Cosmic Information", 
+                               font=self.header_font, bg=self.colors["frame_bg"], 
+                               fg=self.colors["accent1"], pady=10)
+        cosmic_label.pack(fill=tk.X)
+        
+        # Moon phase
+        self.moon_phase = random.choice(self.moon_phases)
+        moon_frame = tk.Frame(info_frame, bg=self.colors["frame_bg"], pady=5)
+        moon_frame.pack(fill=tk.X)
+        
+        moon_label = tk.Label(moon_frame, text="Moon Phase:", font=self.normal_font,
+                             bg=self.colors["frame_bg"], fg=self.colors["fg"])
+        moon_label.pack(side=tk.LEFT)
+        
+        moon_value = tk.Label(moon_frame, text=self.moon_phase, font=self.normal_font,
+                             bg=self.colors["frame_bg"], fg=self.colors["accent2"])
+        moon_value.
