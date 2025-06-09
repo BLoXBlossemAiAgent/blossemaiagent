@@ -1,0 +1,176 @@
+# Mood Palette - A Visual Mood Tracker & Color Journal
+
+## Concept
+"Mood Palette" is a unique, visually engaging daily mood tracker that lets users log their emotions by selecting from a palette of professional colors. Each day, users pick a color that best represents their mood and add an optional note. Over time, the app displays a beautiful calendar grid of colored tiles—creating a personal 'mood palette' journal.
+
+This approach combines color psychology with journaling in an innovative way, offering both emotional insight and aesthetic satisfaction. It's ideal for anyone interested in self-reflection or mental wellness.
+
+---
+
+## Features
+
+- **Modern UI:** Uses professional colors (muted pastels and deep tones), rounded frames, and clean fonts.
+- **Daily Logging:** Select your mood color from a curated palette; add an optional text note.
+- **Calendar View:** See your month as colored tiles—a visual diary of your moods.
+- **Notes Popup:** Click any tile to view or edit the day's note.
+- **Data Persistence:** Saves data locally (using JSON) so you never lose your history.
+
+---
+
+## Code: Mood Palette App
+
+```python
+import tkinter as tk
+from tkinter import ttk, simpledialog, messagebox
+import datetime
+import json
+import os
+
+# --- Professional Color Palette ---
+COLOR_PALETTE = [
+    ("Calm Blue", "#6C8EBF"),
+    ("Serene Green", "#7FB77E"),
+    ("Sunny Yellow", "#FFD56B"),
+    ("Warm Coral", "#FF7F50"),
+    ("Gentle Lavender", "#A393EB"),
+    ("Deep Slate", "#495867")
+]
+
+FONT_TITLE = ('Segoe UI', 18, 'bold')
+FONT_LABEL = ('Segoe UI', 12)
+FONT_NOTE = ('Segoe UI', 10)
+DATA_FILE = "mood_palette_data.json"
+
+class MoodPaletteApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Mood Palette – Visual Mood Tracker")
+        self.configure(bg="#f5f6fa")
+        self.resizable(False, False)
+
+        # Load data or initialize empty structure
+        self.data = self.load_data()
+        
+        # --- Layout Frames ---
+        header_frame = tk.Frame(self, bg="#f5f6fa")
+        header_frame.pack(pady=(20,10))
+        
+        calendar_frame = tk.Frame(self,bg="#e9ecef", bd=2,
+                                 relief="groove")
+        calendar_frame.pack(padx=20,pady=(0,15))
+
+        action_frame = tk.Frame(self,bg="#f5f6fa")
+        action_frame.pack()
+
+        # --- Header Section ---
+        title_lbl = tk.Label(header_frame,
+                             text="Mood Palette",
+                             font=FONT_TITLE,
+                             fg="#495867",
+                             bg="#f5f6fa"
+                            )
+        
+        subtitle_lbl=tk.Label(header_frame,
+                              text="Track each day's mood with color.",
+                              font=('Segoe UI',11),
+                              fg='#888',
+                              bg='#f5f6fa'
+                            )
+        
+        title_lbl.grid(row=0,column=0)
+        
+        subtitle_lbl.grid(row=1,column=0)
+
+         # --- Calendar Section ---
+         
+         # Get current month/year for display
+         today=datetime.date.today()
+         year=today.year; month=today.month;
+         
+         cal_title=tk.Label(calendar_frame,text=f"{today.strftime('%B %Y')}",
+                            font=('Segoe UI Semibold',14),
+                            fg='#333',
+                            bg='#e9ecef')
+         cal_title.grid(row=0,columnspan=7,pady=(8,4))
+         
+         days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+         
+         for i,d in enumerate(days):
+             lbl=tk.Label(calendar_frame,text=d,font=('Segoe UI',10,'bold'),
+                          width=4,bg='#e9ecef',fg='#666')
+             lbl.grid(row=1,column=i,padx=(2),pady=(2))
+             
+         first_day=datetime.date(year,month,1).weekday()   # Monday==0 
+         
+         num_days=(datetime.date(year+(month//12),(month%12)+1 ,1)-datetime.timedelta(days=1)).day if month<12 else 31
+        
+          # Draw day tiles:
+          row,col,start_row,start_col,note_btns={}, {},2,(first_day)%7,[]
+          
+          for d in range(1,num_days+1):
+              dt_str=f"{year}-{month:02d}-{d:02d}"
+              entry=self.data.get(dt_str,{})
+              col_idx=((first_day+d-1)%7)
+              row_idx=((first_day+d-1)//7)+start_row 
+              
+              clr_code=self.get_color(entry.get('color'))
+              
+              btn=tk.Button(calendar_frame,text=str(d),
+                           width=4,height=2,font=('Segoe UI Semibold',11),
+                           relief='flat',
+                           bg=(clr_code if clr_code else '#fff'),
+                           activebackground=(clr_code if clr_code else '#eee'),
+                           fg='#222' if not clr_code else '#fff',
+                           command=lambda date_str=dt_str:self.edit_entry(date_str)
+                          )
+              
+              btn.grid(row=row_idx,column=col_idx,padx=(3),pady=(3))
+              
+          # --- Action Section (Today's Entry)---
+          
+          today_label=tk.Label(action_frame,text=f"Log today's mood:",
+                               font=('Segoe UI Semibold',13),bg="#f5f6fa",
+                               fg='#495867')
+          today_label.pack(anchor='w')
+
+          pal_frm=tk.Frame(action_frame,bg="#fafbfc"); pal_frm.pack(pady=(3));
+          
+          selected_color_var=tk.StringVar(value="")
+          
+          def select_color(clr_name):
+                selected_color_var.set(clr_name)
+
+           radio_buttons=[]
+           for name,color in COLOR_PALETTE:
+               rb_style={'indicatoron':False,'width':14,'padx':8,'font':('Segoe UI',11)}
+               rb=tk.Radiobutton(
+                   pal_frm,text=name,value=name,var=
+                   selected_color_var,
+                   command=lambda n=name:select_color(n),
+                   background=color,
+                   foreground='white' if sum(int(color[i:i+2],16)for i in(1,3 ,5))<400 else '#222',
+                   selectcolor=color,
+                   borderwidth=int(selected_color_var.get()==name)*3 ,
+                    relief='ridge'
+               )
+               rb.pack(side='left' ,padx =(4));
+               radio_buttons.append(rb);
+
+           note_entry_box=None;
+
+           def save_today():
+                sel_col_nm=str(selected_color_var.get())
+                sel_note=str(note_entry_box.get())
+                if not sel_col_nm:
+                    messagebox.showwarning("Pick Color!","Please select today's mood color.")
+                    return
+                
+                dt_key=today.strftime("%Y-%m-%d");
+                
+                self.data[dt_key]={'color':sel_col_nm,'note':sel_note}
+                
+                self.save_data()
+                
+                messagebox.showinfo("Saved!","Today's entry saved.\nRestart app to refresh calendar.")
+           
+            note_label=tk.Label(action_
