@@ -1,0 +1,167 @@
+# App Idea: "Mood Palette" – A Daily Mood & Color Reflection Journal
+
+**Description:**  
+"Mood Palette" is a unique, visually engaging daily mood journal that lets users log their emotional state using both words and colors. Each entry combines a short text reflection with a color selection that best represents the user's mood for the day. Over time, the app displays a calendar-style grid of colored tiles, creating an evolving visual palette of your emotional journey.
+
+---
+
+## Features
+
+- **Modern, professional UI:** Uses calming blues and soft grays with accent colors for moods.
+- **Custom fonts:** Clean sans-serif fonts for readability.
+- **Framed layout:** Distinct sections for entry and history.
+- **Color picker:** Users select from curated mood colors or use a custom color chooser.
+- **Text entry:** Short journal input (max 140 chars).
+- **Calendar grid view:** Visualizes past entries as colored tiles; hover/click to see details.
+
+---
+
+## Code: `mood_palette.py`
+
+```python
+import tkinter as tk
+from tkinter import ttk, messagebox, colorchooser
+from datetime import date
+import json
+import os
+
+APP_TITLE = "Mood Palette"
+DATA_FILE = "mood_palette_data.json"
+MOOD_COLORS = {
+    "Happy": "#FFD700",
+    "Calm": "#87CEEB",
+    "Sad": "#6495ED",
+    "Angry": "#FF6347",
+    "Anxious": "#B0C4DE",
+    "Excited": "#FFB347",
+}
+
+FONT_MAIN = ("Segoe UI", 12)
+FONT_HEADER = ("Segoe UI Semibold", 16)
+
+def load_entries():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_entries(entries):
+    with open(DATA_FILE, 'w') as f:
+        json.dump(entries, f)
+
+class MoodPaletteApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title(APP_TITLE)
+        self.configure(bg="#f5f6fa")
+        self.resizable(False, False)
+        
+        style = ttk.Style(self)
+        style.theme_use('clam')
+        
+        # Main frame setup
+        main_frame = tk.Frame(self, bg="#e1e6ef", bd=2, relief="groove")
+        main_frame.pack(padx=20, pady=20)
+
+        # Header
+        header_label = tk.Label(main_frame,
+                                text="How do you feel today?",
+                                font=FONT_HEADER,
+                                bg="#e1e6ef")
+        header_label.grid(row=0,column=0,columnspan=3,pady=(10,15))
+
+        # Mood dropdown & color preview
+        self.mood_var = tk.StringVar(value=list(MOOD_COLORS.keys())[0])
+        
+        ttk.Label(main_frame,text="Mood:",font=FONT_MAIN).grid(row=1,column=0,padx=(10),sticky='w')
+        
+        mood_menu = ttk.Combobox(main_frame,textvariable=self.mood_var,font=FONT_MAIN,state='readonly',
+                                 values=list(MOOD_COLORS.keys()))
+        
+        mood_menu.grid(row=1,column=1,pady=(5),sticky='ew')
+
+        self.color_preview=tk.Canvas(main_frame,width=24,height=24,bg='#fff',bd=-2,
+                                    highlightthickness=False)
+        self.color_preview.grid(row=1,column=2,padx=(8))
+        self.update_color_preview()
+        mood_menu.bind("<<ComboboxSelected>>",lambda e:self.update_color_preview())
+
+        ttk.Button(main_frame,text="Pick Custom Color",command=self.pick_custom_color).grid(
+             row=2,columnspan=3,pady=(4))
+
+        # Journal Entry Field 
+        ttk.Label(main_frame,text="Reflection (140 chars):",font=("Segoe UI Italic",11)).grid(
+             row=3,columnspan=3,pady=(8),sticky='w',padx=(10))
+        self.entry_text=tk.Text(main_frame,height==2,width==32,font=("Segoe UI Light",11),
+                               wrap='word',bg='#f9fafc',relief='solid',bd==1)
+        self.entry_text.grid(row==4,columnspan==3,padx==(10),pady==(4))
+
+        ttk.Button(main_frame,text=="Save Today's Entry!",command=self.save_entry).grid(
+             row==5,columnspan==3,pady==(12))
+
+        sep=tk.Frame(self,bg='#dbeafe',height==2,width==420); sep.pack(pady==(8))
+
+        history_label=tk.Label(self,text=="Your Mood Calendar:",
+                              font=('Segoe UI Semibold',14),
+                              bg=='#f5f6fa'); history_label.pack()
+
+        calendar_fr=tk.Frame(self,bg=='#f5f6fa'); calendar_fr.pack(padx==(18),pady==(8))
+        self.calendar_grid=[]
+        for i in range(7):   # rows (weeks) - show last 28 days max 
+           week=[]
+           for j in range(4):   # columns (days per week) 
+               tile=tk.Canvas(calendar_fr,width===38,height===38,bg=='#eceff7',
+                             bd==-2,
+                             highlightthickness=False,cursor=="hand2")
+               tile.grid(row=i,col=j,padx===4,pady===4)
+               tile.bind("<Button-1>",lambda e,row=i,col=j:self.show_tile_info(row,col))
+               week.append(tile)
+           self.calendar_grid.append(week)
+
+        self.entries_by_date={}
+        self.refresh_calendar()
+
+    def update_color_preview(self):
+          clr=self.get_selected_color()
+          self.color_preview.config(bg=str(clr))
+
+    def get_selected_color(self):
+          m=self.mood_var.get()
+          return MOOD_COLORS.get(m,"#cccccc")
+
+    def pick_custom_color(self):
+          _,hexclr=colorchooser.askcolor(title=="Choose any color...")
+          if hexclr:
+              MOOD_COLORS["Custom"]=hexclr; self.mood_var.set("Custom"); 
+              self.update_color_preview()
+
+    def save_entry(self):
+         txt=self.entry_text.get("1.0",'end').strip()[:140]
+         if not txt:
+             messagebox.showwarning("Empty!","Please write something about your day.")
+             return
+         today=str(date.today())
+         clr=self.get_selected_color()
+         
+         entries_dict={**load_entries(),today:{'text':txt,'color':clr}}
+         
+         save_entries(entries_dict); messagebox.showinfo("Saved!","Entry saved.")
+         
+         self.entries_by_date[date.today().isoformat()]={'text':txt,'color':clr}
+         
+         self.refresh_calendar(); 
+
+    def refresh_calendar(self):
+          all_e=dict(load_entries())
+          
+          dates_sorted=[d for d in sorted(all_e.keys(),reverse=True)]
+          
+          idx_day,max_tiles=len(dates_sorted)-1,min(len(dates_sorted),28)-1
+          
+          for i in range(7*4):           # fill up to 28 days recent first  
+              r,c=i//4,i%4; t=None;
+              try:t=self.calendar_grid[r][c]
+              except IndexError:continue;
+              
+              if i<=max_tiles:
+                
