@@ -1,0 +1,189 @@
+# Mood Palette – A Daily Mood & Color Reflection Journal
+
+## App Idea: "Mood Palette" – A Daily Mood & Color Reflection Journal
+
+**Concept:**  
+"Mood Palette" is a unique, small Tkinter app that lets users log their daily mood and select a color that represents how they feel. Over time, it builds a visual calendar of moods as colored tiles, helping users reflect on emotional patterns and associations between colors and feelings. This combines journaling with color psychology in an innovative way.
+
+---
+
+## Features
+
+- **Daily Mood Entry:** Select your mood from preset options or type your own.
+- **Color Picker:** Choose any color to represent today's feeling.
+- **Visual Calendar:** Each day appears as a colored tile; hover for mood details.
+- **Minimalist Design:** Professional fonts, modern frames, and harmonious colors.
+
+---
+
+## Code
+
+```python
+import tkinter as tk
+from tkinter import ttk, colorchooser
+from datetime import date
+import json
+import os
+
+# --- Constants ---
+APP_TITLE = "Mood Palette"
+FONT_MAIN = ("Segoe UI", 12)
+FONT_TITLE = ("Segoe UI Semibold", 16)
+BG_COLOR = "#f7f8fa"
+FRAME_COLOR = "#e3e6ed"
+MOOD_OPTIONS = ["Happy", "Sad", "Calm", "Anxious", "Excited", "Tired"]
+DATA_FILE = "mood_palette_data.json"
+
+# --- Data Handling ---
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_data(data):
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f)
+
+# --- Main App Class ---
+class MoodPaletteApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title(APP_TITLE)
+        self.configure(bg=BG_COLOR)
+        self.resizable(False, False)
+
+        # Load data
+        self.data = load_data()
+
+        # Frames setup
+        self.setup_frames()
+        
+    def setup_frames(self):
+        # Title Frame
+        title_frame = tk.Frame(self, bg=BG_COLOR)
+        title_frame.pack(pady=(18, 0))
+        
+        tk.Label(
+            title_frame,
+            text="Mood Palette",
+            font=FONT_TITLE,
+            fg="#2c3e50",
+            bg=BG_COLOR,
+            pady=4,
+            padx=10).pack()
+
+         # Entry Frame (for today's entry)
+         entry_frame = tk.Frame(self, bg=FRAME_COLOR, bd=1.5,
+                                relief="ridge")
+         entry_frame.pack(padx=20,pady=(10,8), fill='x')
+
+         today_str=date.today().isoformat()
+         
+         tk.Label(entry_frame,text=f"Today: {today_str}",
+                  font=("Segoe UI Semibold",13),
+                  bg=FRAME_COLOR).grid(row=0,columnspan=3,pady=(6 ,2))
+
+         # Mood selection dropdown or entry box 
+         self.mood_var=tk.StringVar(value="")
+         
+         ttk.Combobox(entry_frame,textvariable=self.mood_var,font=("Segoe UI",11),
+                      values=[*MOOD_OPTIONS,"Other..."],width=14,state='readonly').grid(row=1,columnspan=2,padx=(12 ,4),pady=(0 ,7))
+         
+         # Color picker button 
+         self.color_var=tk.StringVar(value="#a9cce3")
+         
+         pick_btn=tk.Button(entry_frame,text="Pick Color",
+                            command=self.pick_color,bg="#3498db",
+                            fg="white",font=("Segoe UI Semibold ",11),
+                            relief='flat')
+         
+         pick_btn.grid(row=1,column=2,padx=(4 ,12),pady=(0 ,7))
+         
+          # Save button 
+          save_btn=tk.Button(entry_frame,text="Save Today",
+                             command=self.save_today,bg="#27ae60 ",
+                             fg="white ",font=("Segoe UI Semibold ",11),
+                             relief='flat')
+          save_btn.grid(rowspan=len(MOOD_OPTIONS)+2,row=len(MOOD_OPTIONS)+2,columnspan=
+                        3,pady =(5 ,9))
+
+          # Calendar frame for visualization 
+          cal_label=tk.Label(self,text="Your Month's Moods:",
+                            font=("Segoe UI Bold ",13),bg=
+                            BG_COLOR )
+          cal_label.pack(anchor ='w',padx =(22 ,0 ),pady =(8 ,
+                                                          1 ))
+          
+          calendar_frm=tk.Frame(self,bg='#dbeafe',bd =
+                                .5 )
+          
+          calendar_frm.pack(padx =(20 ,
+                                  20 ),pady =(0 ,
+                                              15 ))
+          
+           self.calendar_frm =
+           calendar_frm 
+
+           self.draw_calendar ()
+           
+     def pick_color (self ):
+           _,hexcode=colorchooser.askcolor(title ="Choose your mood color ")
+           if hexcode :
+               self.color_var.set(hexcode )
+
+     def save_today (self ):
+           today=date.today().isoformat ()
+           
+           mood=self.mood_var.get ()
+           
+           if not mood :
+               return
+            
+           if mood =="Other...":
+                other_mood=simpledialog.askstring("Custom Mood","Describe your current feeling:")
+                if other_mood:
+                    mood=str(other_mood).strip()
+                else:
+                    return
+            
+            
+             colr=self.color_var.get() or "#a9cce3"
+             new_entry={"date":today,"mood":str(mood),"color":colr}
+             
+             # Save to data dict by date key 
+             self.data[today]=new_entry 
+             save_data(self.data )
+             
+             msgbox.showinfo("Saved!","Today's palette saved.")
+             
+             self.draw_calendar ()
+
+      def draw_calendar (self ):
+              """Draws the last month's entries in grid."""
+              for widget in   \
+                  list(\
+                      getattr(
+                          getattr(
+                              getattr(
+                                  getattr(getattr(getattr(getattr(getattr(getattr(getattr(self,'calendar_frm'),'children'),None),'children'),None),'children'),None),'children'),None),'values',[])):
+                  widget.destroy()
+              
+              days=list(sorted((d for d in \
+                               list(set(k[:7]for k in \
+                                       list(set(list(map(str,self.data.keys())))))))))
+              
+              this_month=date.today().strftime("%Y-%m")
+              
+              entries=[v for k,v in sorted(\
+                                          ((k,v)for k,v in \
+                                           list(set(list(map(lambda x:(x[0],x[1]),list(zip(list(map(str,self.data.keys())),list(map(dict,self.data.values())))))))),key=lambda x:x[0]))if k.startswith(this_month)]
+              
+              cols=min(len(entries),7)or 1;rows=((len(entries)-1)//cols+1)or 1;
+              
+              for idx,e in enumerate(entries):   
+                   r,c=int(idx//cols),int(idx%cols);
+                   tile=tk.Canvas(self.calendar_frm,width=
+                                 38,height=
+                                 38,bg=e['color'],highlightthickness=.6,
+                                 highlightbackground='#bfc9cf')
